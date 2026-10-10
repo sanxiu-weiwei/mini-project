@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: my_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 你的真实密码  # 👈 改成你本机的 MySQL 密码
+      MYSQL_DATABASE: my_fullstack_db
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+
+  redis:
+    image: redis:alpine
+    container_name: my_redis
+    ports:
+      - "6379:6379"
+
+  backend:
+    build: ./
+    container_name: my_backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mysql
+      - redis
+    environment:
+      - DB_HOST=mysql  # 👈 注意：这里是容器名
+      - DB_USER=root
+      - DB_PASS=你的真实密码  # 👈 改成你本机的 MySQL 密码
+      - DB_NAME=my_fullstack_db
+
+  frontend:
+    build: ../vue-app  # 👈 注意：指定前端代码所在的相对路径
+    container_name: my_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
